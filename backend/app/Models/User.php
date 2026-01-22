@@ -68,9 +68,7 @@ class User extends Authenticatable
         return $this->hasMany(Wishlist::class);
     }
 
-    /**
-     * --------------------- ACCESSORS & HELPERS ---------------------
-     */
+    /* --------------------- ACCESSORS & HELPERS --------------------- */
 
     // Check if user is admin
     public function isAdmin(): bool

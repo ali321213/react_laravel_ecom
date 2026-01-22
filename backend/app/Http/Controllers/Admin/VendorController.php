@@ -1,49 +1,43 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
 use App\Http\Controllers\Controller;
+use App\Models\Vendor;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class VendorController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * List all vendors
      */
     public function index()
     {
-        //
+        return Vendor::with('user')->latest()->paginate(15);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Approve / Update vendor
      */
-    public function store(Request $request)
+    public function update(Request $request, Vendor $vendor)
     {
-        //
+        $data = $request->validate([
+            'commission_percentage' => 'required|numeric|min:0|max:100',
+            'status' => 'required|in:approved,rejected,suspended',
+        ]);
+        $vendor->update($data);
+        return response()->json([
+            'message' => 'Vendor updated successfully',
+            'vendor'  => $vendor,
+        ]);
     }
 
     /**
-     * Display the specified resource.
+     * Delete vendor
      */
-    public function show(string $id)
+    public function destroy(Vendor $vendor)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $vendor->delete();
+        return response()->json(['message' => 'Vendor deleted']);
     }
 }
