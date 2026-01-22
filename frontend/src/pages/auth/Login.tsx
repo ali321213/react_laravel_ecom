@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { login } from "../features/auth/authSlice";
+import { login } from "../../features/auth/authSlice";
 
 export default function Login() {
   const dispatch = useDispatch<any>();
