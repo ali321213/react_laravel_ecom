@@ -13,15 +13,5 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // API middleware group
-        $middleware->group('api', [
-            EnsureFrontendRequestsAreStateful::class,
-            'throttle:api',
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        ]);
-        // Middleware aliases
-        $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
-        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {})->create();

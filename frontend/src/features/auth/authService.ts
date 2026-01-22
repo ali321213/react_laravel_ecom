@@ -4,7 +4,7 @@ export const loginApi = async (data: {
   email: string;
   password: string;
 }) => {
-  const res = await api.post("/auth/login", data);
+  const res = await api.post("/login", data);
   return res.data;
 };
 
@@ -13,11 +13,11 @@ export const registerApi = async (data: {
   email: string;
   password: string;
 }) => {
-  const res = await api.post("/auth/register", data);
+  const res = await api.post("/register", data);
   return res.data;
 };
 
 export const meApi = async () => {
-  const res = await api.get("/auth/me");
+  const res = await api.get("/me");
   return res.data;
 };
