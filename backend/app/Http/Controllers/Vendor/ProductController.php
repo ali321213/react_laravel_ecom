@@ -54,4 +54,12 @@ class ProductController extends Controller
         $product->delete();
         return response()->json(['message' => 'Product deleted']);
     }
+
+    public function all()
+    {
+        $products = Product::with(['category', 'vendor.user'])
+            ->where('status', 'active')->get()
+            ->groupBy(fn ($product) => $product->category->name);
+        return response()->json($products);
+    }
 }

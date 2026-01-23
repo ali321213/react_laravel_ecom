@@ -11,10 +11,10 @@ Route::get('/', function () {
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::get('/products', [ProductController::class, 'all']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-
     Route::middleware('role:vendor')->group(function () {
         Route::apiResource('vendor/products', ProductController::class);
     });

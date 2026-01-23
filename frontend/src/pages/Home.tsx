@@ -1,11 +1,20 @@
 // frontend/src/pages/Home.tsx
 import { useAuth } from "../hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProducts } from "../api/products";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { FiShoppingCart, FiSearch, FiLogOut } from "react-icons/fi";
 import { FaUserCircle } from "react-icons/fa";
 
 export default function Home() {
+  /* ✅ ALL HOOKS AT TOP */
+  const { user, isAdmin, isVendor, isCustomer } = useAuth();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
   function ProfileDropdown({ user }: { user: any }) {
     const [open, setOpen] = useState(false);
 
@@ -93,7 +102,6 @@ export default function Home() {
       color: "Iso Dots",
     },
   ];
-  const { user, isAdmin, isVendor, isCustomer } = useAuth();
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
@@ -219,6 +227,62 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* prc */}
+      
+      
+      {/* MAIN CONTENT */}
+      {isLoading ? (
+        <p className="text-center mt-32 text-lg">Loading products...</p>
+      ) : (
+        <>
+          {/* Dashboard Section */}
+          <section className="mt-20 text-center space-y-4">
+            {isAdmin && <p className="text-indigo-400">Admin Dashboard</p>}
+            {isVendor && <p className="text-green-400">Vendor Dashboard</p>}
+            {isCustomer && <p className="text-yellow-400">Shop Products</p>}
+          </section>
+
+          {/* Products by Category */}
+          <div className="bg-white">
+            <div className="max-w-7xl mx-auto px-6 py-16">
+              {Object.entries(data || {}).map(([category, products]: any) => (
+                <div key={category} className="mb-16">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                    {category}
+                  </h2>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {products.map((product: any) => (
+                      <div
+                        key={product.id}
+                        className="border rounded-lg p-4 hover:shadow-lg"
+                      >
+                        <img
+                          src={product.image || "https://via.placeholder.com/300"}
+                          className="h-48 w-full object-cover rounded"
+                        />
+
+                        <h3 className="mt-3 font-semibold text-gray-900">
+                          {product.name}
+                        </h3>
+
+                        <p className="text-sm text-gray-500">
+                          Sold by {product.vendor?.user?.name}
+                        </p>
+
+                        <p className="mt-2 font-bold text-indigo-600">
+                          ${product.price}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
