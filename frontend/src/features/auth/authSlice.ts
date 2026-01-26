@@ -1,3 +1,4 @@
+// frontend\src\features\auth\authSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { AuthState } from "./authTypes";
 import { loginApi, meApi } from "./authService";

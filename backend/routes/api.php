@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Vendor\ProductController;
+use App\Http\Controllers\Customer\CartController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,4 +23,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::apiResource('admin/vendors', VendorController::class);
     });
+
+    Route::get('/cart', [CartController::class, 'index']);
+    Route::post('/cart/add', [CartController::class, 'add']);
+    Route::put('/cart/item/{cartItem}', [CartController::class, 'update']);
+    Route::delete('/cart/item/{cartItem}', [CartController::class, 'remove']);
 });

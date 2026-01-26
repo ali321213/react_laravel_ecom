@@ -10,11 +10,21 @@ class CartItem extends Model
         'product_id',
         'vendor_id',
         'quantity',
-        'price'
+        'price',
     ];
+
+    public function cart()
+    {
+        return $this->belongsTo(Cart::class);
+    }
 
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function vendor()
+    {
+        return $this->belongsTo(Vendor::class);
     }
 }

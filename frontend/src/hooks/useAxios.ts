@@ -1,4 +1,4 @@
-// frontend\src\hooks\useAuth.ts
+// frontend\src\hooks\useAxios.ts
 import { useSelector } from "react-redux";
 import type { RootState } from "../app/store";
 
