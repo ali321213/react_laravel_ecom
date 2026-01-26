@@ -6,9 +6,13 @@ import Cart from "./pages/Cart";
 import ProductDetail from "./pages/ProductDetail";
 import Shop from "./pages/Shop";
 import ForgotPassword from "./pages/auth/ForgotPassword";
-
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { GuestRoute } from "./routes/GuestRoute";
+import AdminRoute from "./routes/AdminRoutes";
+import VendorRoute from "./routes/VendorRoutes";
+import AdminDashboard from "./pages/admin/Dashboard";
+import VendorDashboard from "./pages/vendor/Dashboard";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -48,6 +52,25 @@ function App() {
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/" element={<Home />} />
         <Route path="*" element={<Home />} />
+        <Route path="/Profile" element={<Profile />} />
+
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/vendor/dashboard"
+          element={
+            <VendorRoute>
+              <VendorDashboard />
+            </VendorRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

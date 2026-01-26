@@ -25,7 +25,7 @@ class CartController extends Controller
     {
         $data = $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity'   => 'nullable|integer|min:1',
+            'quantity' => 'nullable|integer|min:1',
         ]);
 
         $user = $request->user();
@@ -45,11 +45,11 @@ class CartController extends Controller
             $item->increment('quantity', $data['quantity'] ?? 1);
         } else {
             CartItem::create([
-                'cart_id'   => $cart->id,
-                'product_id'=> $product->id,
+                'cart_id' => $cart->id,
+                'product_id' => $product->id,
                 'vendor_id' => $product->vendor_id,
-                'quantity'  => $data['quantity'] ?? 1,
-                'price'     => $product->sale_price ?? $product->price,
+                'quantity' => $data['quantity'] ?? 1,
+                'price' => $product->sale_price ?? $product->price,
             ]);
         }
 
@@ -62,9 +62,7 @@ class CartController extends Controller
         $request->validate([
             'quantity' => 'required|integer|min:1'
         ]);
-
         $cartItem->update(['quantity' => $request->quantity]);
-
         return response()->json(['message' => 'Cart updated']);
     }
 
@@ -72,7 +70,16 @@ class CartController extends Controller
     public function remove(CartItem $cartItem)
     {
         $cartItem->delete();
-
         return response()->json(['message' => 'Item removed']);
+    }
+
+    public function count(Request $request)
+    {
+        $cart = Cart::where('user_id', $request->user()->id)
+            ->where('status', 'active')->with('items')->first();
+        $count = $cart ? $cart->items->sum('quantity') : 0;
+        return response()->json([
+            'count' => $count
+        ]);
     }
 }

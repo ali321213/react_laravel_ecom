@@ -18,3 +18,8 @@ export const updateCartItem = (itemId: number, quantity: number) =>
 
 export const removeCartItem = (itemId: number) =>
     api.delete(`/cart/item/${itemId}`);
+
+export const fetchCartCount = async () => {
+  const { data } = await api.get("/cart/count");
+  return data.count;
+};

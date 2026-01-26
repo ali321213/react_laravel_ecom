@@ -1,17 +1,14 @@
-// frontend/src/routes/ProtectedRoute.tsx
+// frontend/src/routes/AdminRoutes.tsx
+import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
 
-type ProtectedRouteProps = {
-  children: JSX.Element;
-};
+export default function AdminRoute({ children }: { children: JSX.Element }) {
+  const { user, token } = useSelector((state: any) => state.auth);
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user } = useAuth();
+  if (!token) return <Navigate to="/login" replace />;
 
-  // If not logged in, redirect to login
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  if (user && user.role !== "admin") {
+    return <Navigate to="/" replace />;
   }
 
   return children;

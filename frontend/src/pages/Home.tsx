@@ -6,11 +6,12 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { FiShoppingCart, FiSearch, FiLogOut } from "react-icons/fi";
 import { FaUserCircle } from "react-icons/fa";
-// import { addToCart } from "../api/cart";
-// import { useMutation } from "@tanstack/react-query";
 import { addToCart } from "../services/cart";
+import { useCartCount } from "../hooks/useCartCount";
 
 export default function Home() {
+  const { data: cartCount } = useCartCount();
+
   /* ✅ ALL HOOKS AT TOP */
   const { user, isAdmin, isVendor, isCustomer } = useAuth();
 
@@ -93,11 +94,15 @@ export default function Home() {
           {/* Right Section */}
           <div className="flex flex-1 justify-end items-center gap-6">
             {/* Cart */}
+
             <Link to="/cart" className="relative">
               <FiShoppingCart className="text-2xl" />
-              <span className="absolute -top-2 -right-2 bg-indigo-500 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                3
-              </span>
+
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-indigo-500 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </Link>
 
             {/* Profile */}
@@ -197,9 +202,11 @@ export default function Home() {
                           ${product.price}
                         </p>
 
-                        <button onClick={() => addToCart(product.id)}
-                        className="mt-3 w-full font-bold bg-indigo-600 text-white py-2 rounded hover:bg-indigo-500">
-                        Add to Cart{" "}
+                        <button
+                          onClick={() => addToCart(product.id)}
+                          className="mt-3 w-full font-bold bg-indigo-600 text-white py-2 rounded hover:bg-indigo-500"
+                        >
+                          Add to Cart{" "}
                         </button>
                       </div>
                     ))}

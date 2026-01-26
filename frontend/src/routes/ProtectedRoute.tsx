@@ -8,6 +8,7 @@ type ProtectedRouteProps = {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user } = useAuth();
+  alert(user);
 
   // If not logged in, redirect to login
   if (!user) {
