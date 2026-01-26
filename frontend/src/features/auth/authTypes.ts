@@ -1,5 +1,4 @@
 // src/features/auth/authTypes.ts
-
 export type Role = "admin" | "vendor" | "customer";
 
 export interface User {
