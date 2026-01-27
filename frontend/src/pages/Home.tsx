@@ -1,4 +1,6 @@
-// frontend/src/pages/Home.tsx
+// This is the main landing page ("/").
+// It shows a hero section and a list of products grouped by category.
+
 import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts } from "../api/products";
@@ -8,8 +10,13 @@ import Navbar from "../components/layout/Navbar";
 
 export default function Home() {
   /* ALL HOOKS AT TOP */
+
+  // Read role-related flags from auth hook.
   const { isAdmin, isVendor, isCustomer } = useAuth();
 
+  // Fetch products using React Query.
+  // - queryKey: identifies this request in the cache.
+  // - queryFn: function that actually fetches products from backend.
   const { data, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: fetchProducts,
@@ -17,9 +24,10 @@ export default function Home() {
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
+      {/* Global navigation bar at the top */}
       <Navbar />
 
-      {/* Hero */}
+      {/* Hero section at top of page */}
       <main className="relative isolate px-6 pt-32 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-5xl font-bold tracking-tight sm:text-7xl">
@@ -47,26 +55,27 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Dashboard Section */}
+      {/* Small section showing text based on user role */}
       <section className="text-center space-y-4">
         {isAdmin && <p className="text-indigo-400">Admin Dashboard</p>}
         {isVendor && <p className="text-green-400">Vendor Dashboard</p>}
         {isCustomer && <p className="text-yellow-400">Shop Products</p>}
       </section>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN CONTENT (products list) */}
       {isLoading ? (
         <p className="text-center mt-32 text-lg">Loading products...</p>
       ) : (
         <>
-          {/* Dashboard Section */}
+          {/* Repeat dashboard text after loading products */}
           <section className="mt-20 text-center space-y-4">
             {isAdmin && <p className="text-indigo-400">Admin Dashboard</p>}
             {isVendor && <p className="text-green-400">Vendor Dashboard</p>}
             {isCustomer && <p className="text-yellow-400">Shop Products</p>}
           </section>
 
-          {/* Products by Category */}
+          {/* Products grouped by category.
+              `data` is expected to be an object like { "Category": [products...] } */}
           <div className="bg-white">
             <div className="max-w-7xl mx-auto px-6 py-16">
               {Object.entries(data || {}).map(([category, products]: any) => (
@@ -75,6 +84,7 @@ export default function Home() {
                     {category}
                   </h2>
 
+                  {/* Product cards grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {products.map((product: any) => (
                       <div
@@ -100,6 +110,8 @@ export default function Home() {
                           ${product.price}
                         </p>
 
+                        {/* Button that calls backend to add item to cart.
+                            (This uses services/cart.ts directly, not Redux) */}
                         <button
                           onClick={() => addToCart(product.id)}
                           className="mt-3 w-full font-bold bg-indigo-600 text-white py-2 rounded hover:bg-indigo-500"
