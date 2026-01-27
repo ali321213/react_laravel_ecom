@@ -1,13 +1,7 @@
-// frontend\src\app\store.ts
-import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "../features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import type { TypedUseSelectorHook } from "react-redux";
+import type { RootState, AppDispatch } from "./store";
 
-export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-  },
-});
-
-// ✅ THESE TWO LINES ARE REQUIRED
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+// Typed hooks so we don't have to repeat types everywhere
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

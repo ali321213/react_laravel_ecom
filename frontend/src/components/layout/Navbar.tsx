@@ -1,155 +1,127 @@
-// frontend/src/pages/Cart.tsx
+// frontend/src/components/layout/Navbar.tsx
+import { Link, useNavigate } from "react-router-dom";
+import { FiShoppingCart, FiSearch, FiLogOut } from "react-icons/fi";
+import { FaUserCircle } from "react-icons/fa";
 import { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { FiTrash2 } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
-type CartItem = {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  quantity: number;
-};
+import { useAuth } from "../../hooks/useAuth";
+import { useCartCount } from "../../hooks/useCartCount";
+import { logout } from "../../features/auth/authSlice";
 
-export default function Cart() {
-  const { user, isCustomer } = useAuth();
+/* ---------------- PROFILE DROPDOWN ---------------- */
+function ProfileDropdown({ user }: { user: any }) {
+  const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  // Sample cart data (replace with Redux/Context in production)
-  const [cart, setCart] = useState<CartItem[]>([
-    {
-      id: 1,
-      name: "Basic Tee Black",
-      image:
-        "https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-01-related-product-01.jpg",
-      price: 35,
-      quantity: 2,
-    },
-    {
-      id: 2,
-      name: "Artwork Tee Peach",
-      image:
-        "https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-01-related-product-04.jpg",
-      price: 40,
-      quantity: 1,
-    },
-  ]);
-
-  // Update quantity
-  const updateQuantity = (id: number, qty: number) => {
-    if (qty < 1) return;
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: qty } : item
-      )
-    );
+  const handleLogout = () => {
+    dispatch(logout());          // 🔥 Clear RTK auth state
+    setOpen(false);              // Close dropdown
+    navigate("/login", { replace: true });
   };
-
-  // Remove item
-  const removeItem = (id: number) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  // Calculate totals
-  const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const tax = subtotal * 0.1; // 10% tax
-  const total = subtotal + tax;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
-
-        {cart.length === 0 ? (
-          <p className="text-gray-600">Your cart is empty. <Link to="/" className="text-indigo-600 hover:underline">Shop now</Link></p>
+    <div className="relative">
+      <button
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex items-center gap-2 focus:outline-none"
+      >
+        {user.avatar ? (
+          <img
+            src={user.avatar}
+            alt="Profile"
+            className="w-8 h-8 rounded-full object-cover"
+          />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cart Items */}
-            <div className="lg:col-span-2 space-y-4">
-              {cart.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-4 bg-white p-4 rounded-lg shadow"
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-24 h-24 object-cover rounded"
-                  />
-                  <div className="flex-1">
-                    <h2 className="font-semibold">{item.name}</h2>
-                    <p className="text-gray-600">${item.price.toFixed(2)}</p>
-
-                    <div className="mt-2 flex items-center gap-2">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                      >
-                        -
-                      </button>
-                      <input
-                        type="number"
-                        value={item.quantity}
-                        min={1}
-                        onChange={(e) =>
-                          updateQuantity(item.id, Number(e.target.value))
-                        }
-                        className="w-12 text-center rounded border border-gray-300"
-                      />
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-end gap-2">
-                    <span className="font-semibold">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </span>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <FiTrash2 />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Summary */}
-            <div className="bg-white p-6 rounded-lg shadow space-y-4">
-              <h2 className="text-xl font-bold">Order Summary</h2>
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax (10%)</span>
-                <span>${tax.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-
-              <button className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-500 transition">
-                Proceed to Checkout
-              </button>
-            </div>
-          </div>
+          <FaUserCircle className="text-3xl" />
         )}
+      </button>
 
-        {/* Optional Welcome Message */}
-        {user && isCustomer && (
-          <p className="mt-6 text-gray-700">
-            Hello <span className="font-semibold">{user.name}</span>, ready to complete your order?
-          </p>
-        )}
-      </div>
+      {open && (
+        <div className="absolute right-0 mt-3 w-48 bg-white text-gray-800 rounded-lg shadow-lg py-2">
+          <Link
+            to="/profile"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm hover:bg-gray-100"
+          >
+            Profile
+          </Link>
+
+          <Link
+            to="/orders"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm hover:bg-gray-100"
+          >
+            Orders
+          </Link>
+
+          <button
+            onClick={handleLogout}
+            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2"
+          >
+            <FiLogOut />
+            Logout
+          </button>
+        </div>
+      )}
     </div>
+  );
+}
+
+/* ---------------- NAVBAR ---------------- */
+export default function Navbar() {
+  const { user } = useAuth();
+  const { data: cartCount } = useCartCount();
+
+  return (
+    <header className="absolute inset-x-0 top-0 z-50">
+      <nav className="flex items-center justify-between p-6 lg:px-8 bg-gray-900 text-white">
+        {/* Logo */}
+        <div className="flex flex-1">
+          <Link to="/" className="-m-1.5 p-1.5">
+            <img
+              src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
+              alt="Logo"
+              className="h-8 w-auto"
+            />
+          </Link>
+        </div>
+
+        {/* Search */}
+        <div className="hidden md:flex items-center w-full max-w-md mx-6">
+          <div className="relative w-full">
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="w-full rounded-lg bg-gray-800 border border-gray-700 pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+        </div>
+
+        {/* Right */}
+        <div className="flex flex-1 justify-end items-center gap-6">
+          {/* Cart */}
+          <Link to="/cart" className="relative">
+            <FiShoppingCart className="text-2xl" />
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-indigo-500 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </Link>
+
+          {/* Auth */}
+          {!user ? (
+            <Link to="/login" className="text-sm font-semibold">
+              Log in →
+            </Link>
+          ) : (
+            <ProfileDropdown user={user} />
+          )}
+        </div>
+      </nav>
+    </header>
   );
 }

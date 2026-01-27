@@ -1,11 +1,9 @@
 // frontend\src\hooks\useCartCount.ts
-import { useQuery } from "@tanstack/react-query";
-import { fetchCartCount } from "../services/cart";
+import { useAppSelector } from "../app/hooks";
+import { selectCartCount } from "../features/cart/cartSlice";
 
+// Keep the same return signature `{ data: cartCount }`
 export const useCartCount = () => {
-  return useQuery({
-    queryKey: ["cart-count"],
-    queryFn: fetchCartCount,
-    staleTime: 1000 * 30, // 30 seconds
-  });
+  const count = useAppSelector(selectCartCount);
+  return { data: count };
 };

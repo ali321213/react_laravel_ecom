@@ -1,43 +1,39 @@
 // frontend/src/hooks/useCart.ts
-import { useEffect, useState } from "react";
-import { fetchCart, updateCartItem, removeCartItem } from "../services/cart";
+import { useEffect } from "react";
 import { useAuth } from "./useAuth";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import {
+  fetchCart,
+  removeCartItem,
+  selectCart,
+  selectCartCount,
+  selectCartLoading,
+  selectCartTotals,
+  updateCartItemQuantity,
+} from "../features/cart/cartSlice";
 
 export function useCart() {
   const { isLoggedIn } = useAuth();
-  const [cart, setCart] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+
+  const cart = useAppSelector(selectCart);
+  const loading = useAppSelector(selectCartLoading);
+  const count = useAppSelector(selectCartCount);
+  const { subtotal, tax, total } = useAppSelector(selectCartTotals);
 
   useEffect(() => {
     if (!isLoggedIn) return;
+    dispatch(fetchCart());
+  }, [isLoggedIn, dispatch]);
 
-    fetchCart()
-      .then(setCart)
-      .finally(() => setLoading(false));
-  }, [isLoggedIn]);
-
-  const updateQuantity = async (itemId: number, qty: number) => {
+  const updateQuantity = (itemId: number, qty: number) => {
     if (qty < 1) return;
-    const updated = await updateCartItem(itemId, qty);
-    setCart(updated);
+    dispatch(updateCartItemQuantity({ itemId, quantity: qty }));
   };
 
-  const removeItem = async (itemId: number) => {
-    const updated = await removeCartItem(itemId);
-    setCart(updated);
+  const removeItem = (itemId: number) => {
+    dispatch(removeCartItem(itemId));
   };
-
-  const subtotal =
-    cart?.items.reduce(
-      (sum: number, i: any) => sum + Number(i.price) * i.quantity,
-      0
-    ) ?? 0;
-
-  const tax = subtotal * 0.1;
-  const total = subtotal + tax;
-
-  const count =
-    cart?.items.reduce((sum: number, i: any) => sum + i.quantity, 0) ?? 0;
 
   return {
     cart,

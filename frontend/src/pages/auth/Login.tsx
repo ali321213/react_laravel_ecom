@@ -26,7 +26,7 @@ export default function Login() {
   useEffect(() => {
     if (user?.role) {
       toast.success("Successfully logged in 🎉");
-
+      alert("Role: " + user.role);
       const redirectPath = redirectByRole(user.role);
       navigate(redirectPath, { replace: true });
     }

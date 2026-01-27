@@ -1,23 +1,32 @@
 import api from "../lib/axios";
 
-export const addToCart = (productId: number, quantity = 1) => {
-    return api.post("/cart/add", {
-        product_id: productId,
-        quantity,
-    });
+export const addToCart = async (productId: number, quantity = 1) => {
+  const { data } = await api.post("/cart/add", {
+    product_id: productId,
+    quantity,
+  });
+  return data;
 };
 
-export const getCart = () => {
-    return api.get("/cart");
+export const getCart = async () => {
+  const { data } = await api.get("/cart");
+  return data;
 };
 
-export const fetchCart = () => api.get("/cart");
+export const fetchCart = async () => {
+  const { data } = await api.get("/cart");
+  return data;
+};
 
-export const updateCartItem = (itemId: number, quantity: number) =>
-    api.put(`/cart/item/${itemId}`, { quantity });
+export const updateCartItem = async (itemId: number, quantity: number) => {
+  const { data } = await api.put(`/cart/item/${itemId}`, { quantity });
+  return data;
+};
 
-export const removeCartItem = (itemId: number) =>
-    api.delete(`/cart/item/${itemId}`);
+export const removeCartItem = async (itemId: number) => {
+  const { data } = await api.delete(`/cart/item/${itemId}`);
+  return data;
+};
 
 export const fetchCartCount = async () => {
   const { data } = await api.get("/cart/count");
