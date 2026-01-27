@@ -6,16 +6,16 @@ const api = axios.create({
     Accept: "application/json",
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 // Automatically attach token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-
+  // alert(token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-
   return config;
 });
 

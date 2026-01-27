@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
+
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -53,10 +54,42 @@ class AuthController extends Controller
         ]);
         $token = $user->createToken('api-token')->plainTextToken;
         return response()->json([
-            'user'  => $user,
+            'user' => [
+                'id'    => $user->id,
+                'name'  => $user->name,
+                'email' => $user->email,
+                // Spatie role resolved here
+                'role'  => $user->getRoleNames()->first(),
+            ],
             'token' => $token,
         ]);
     }
+
+    // public function login(Request $request)
+    // {
+    //     $request->validate([
+    //         'email'    => 'required|email',
+    //         'password' => 'required',
+    //     ]);
+    //     $user = User::where('email', $request->email)->first();
+    //     if (! $user || ! Hash::check($request->password, $user->password)) {
+    //         throw ValidationException::withMessages([
+    //             'email' => ['Invalid credentials'],
+    //         ]);
+    //     }
+    //     if (! $user->isActive()) {
+    //         return response()->json(['message' => 'Account is inactive'], 403);
+    //     }
+    //     $user->update([
+    //         'last_login_at' => now(),
+    //         'last_login_ip' => $request->ip(),
+    //     ]);
+    //     $token = $user->createToken('api-token')->plainTextToken;
+    //     return response()->json([
+    //         'user'  => $user,
+    //         'token' => $token,
+    //     ]);
+    // }
 
     /* Logout */
     public function logout(Request $request)
@@ -68,6 +101,12 @@ class AuthController extends Controller
     /* Get Authenticated User */
     public function me(Request $request)
     {
-        return response()->json($request->user()->load('roles'));
+        $user = $request->user();
+        return response()->json([
+            'id'    => $user->id,
+            'name'  => $user->name,
+            'email' => $user->email,
+            'role'  => $user->getRoleNames()->first(),
+        ]);
     }
 }

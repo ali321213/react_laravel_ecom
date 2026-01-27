@@ -6,16 +6,15 @@ use App\Http\Controllers\Vendor\ProductController;
 use App\Http\Controllers\Customer\CartController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/products', [ProductController::class, 'all']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
+
     Route::post('/logout', [AuthController::class, 'logout']);
+    
     Route::middleware('role:vendor')->group(function () {
         Route::apiResource('vendor/products', ProductController::class);
     });

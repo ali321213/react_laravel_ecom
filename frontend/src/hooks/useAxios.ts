@@ -1,15 +1,18 @@
-// frontend\src\hooks\useAxios.ts
+// frontend/src/hooks/useAxios.ts
+import axios from "axios";
 import { useSelector } from "react-redux";
-import type { RootState } from "../app/store";
 
-export const useAuth = () => {
-  const { user, token } = useSelector((state: RootState) => state.auth);
+export function useAxios() {
+  const token = useSelector((state: any) => state.auth.token);
 
-  return {
-    user,
-    isLoggedIn: !!token,
-    isAdmin: user?.role === "admin",
-    isVendor: user?.role === "vendor",
-    isCustomer: user?.role === "customer",
-  };
-};
+  const instance = axios.create({
+    baseURL: import.meta.env.VITE_API_URL,
+  });
+
+  instance.interceptors.request.use((config) => {
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  });
+
+  return instance;
+}

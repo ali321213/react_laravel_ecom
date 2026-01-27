@@ -8,6 +8,6 @@ export const store = configureStore({
   },
 });
 
-// ✅ THESE TWO LINES ARE REQUIRED
+// THESE TWO LINES ARE REQUIRED
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

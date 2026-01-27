@@ -1,4 +1,8 @@
+// frontend/src/App.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
@@ -6,19 +10,33 @@ import Cart from "./pages/Cart";
 import ProductDetail from "./pages/ProductDetail";
 import Shop from "./pages/Shop";
 import ForgotPassword from "./pages/auth/ForgotPassword";
+import Profile from "./pages/Profile";
+
 import { ProtectedRoute } from "./routes/ProtectedRoute";
 import { GuestRoute } from "./routes/GuestRoute";
 import AdminRoute from "./routes/AdminRoutes";
 import VendorRoute from "./routes/VendorRoutes";
+
 import AdminDashboard from "./pages/admin/Dashboard";
 import VendorDashboard from "./pages/vendor/Dashboard";
-import Profile from "./pages/Profile";
+
+import { me } from "./features/auth/authSlice";
 
 function App() {
+  const dispatch = useDispatch<any>();
+
+  // Restore auth on refresh
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      dispatch(me());
+    }
+  }, [dispatch]);
+
   return (
     <BrowserRouter>
       <Routes>
-        {/* Guest-only pages */}
+        {/* Guest-only routes */}
         <Route
           path="/login"
           element={
@@ -36,7 +54,7 @@ function App() {
           }
         />
 
-        {/* Protected pages (user must be logged in) */}
+        {/* Protected routes */}
         <Route
           path="/cart"
           element={
@@ -46,14 +64,7 @@ function App() {
           }
         />
 
-        {/* Public pages */}
-        <Route path="/ProductDetail" element={<ProductDetail />} />
-        <Route path="/Shop" element={<Shop />} />
-        <Route path="/ForgotPassword" element={<ForgotPassword />} />
-        <Route path="/" element={<Home />} />
-        <Route path="*" element={<Home />} />
-        <Route path="/Profile" element={<Profile />} />
-
+        {/* Role-based routes */}
         <Route
           path="/admin/dashboard"
           element={
@@ -71,6 +82,16 @@ function App() {
             </VendorRoute>
           }
         />
+
+        {/* Public routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/profile" element={<Profile />} />
+
+        {/* Fallback */}
+        <Route path="*" element={<Home />} />
       </Routes>
     </BrowserRouter>
   );
