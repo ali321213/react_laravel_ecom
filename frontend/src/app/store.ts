@@ -6,6 +6,7 @@ import { configureStore } from "@reduxjs/toolkit";
 // Each "slice" manages a part of the global state (auth, cart, etc.).
 import authReducer from "../features/auth/authSlice";
 import cartReducer from "../features/cart/cartSlice";
+import productsReducer from "../features/products/productSlice";
 
 // Create the store and register all slices under a key.
 // The keys (auth, cart) become state.auth, state.cart in the Redux state tree.
@@ -13,6 +14,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     cart: cartReducer,
+    products: productsReducer,
   },
 });
 

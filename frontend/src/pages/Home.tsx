@@ -5,7 +5,9 @@ import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts } from "../api/products";
 import { Link } from "react-router-dom";
-import { addToCart } from "../services/cart";
+import { toast } from "react-toastify";
+import { useAppDispatch } from "../app/hooks";
+import { addToCart as addToCartThunk } from "../features/cart/cartSlice";
 import Navbar from "../components/layout/Navbar";
 
 export default function Home() {
@@ -13,6 +15,8 @@ export default function Home() {
 
   // Read role-related flags from auth hook.
   const { isAdmin, isVendor, isCustomer } = useAuth();
+
+  const dispatch = useAppDispatch();
 
   // Fetch products using React Query.
   // - queryKey: identifies this request in the cache.
@@ -110,13 +114,22 @@ export default function Home() {
                           ${product.price}
                         </p>
 
-                        {/* Button that calls backend to add item to cart.
-                            (This uses services/cart.ts directly, not Redux) */}
                         <button
-                          onClick={() => addToCart(product.id)}
+                          onClick={() => {
+                            dispatch(
+                              addToCartThunk({ productId: product.id, quantity: 1 }),
+                            )
+                              .unwrap()
+                              .then(() => {
+                                toast.success("Added to cart");
+                              })
+                              .catch(() => {
+                                toast.error("Failed to add to cart");
+                              });
+                          }}
                           className="mt-3 w-full font-bold bg-indigo-600 text-white py-2 rounded hover:bg-indigo-500"
                         >
-                          Add to Cart{" "}
+                          Add to Cart
                         </button>
                       </div>
                     ))}

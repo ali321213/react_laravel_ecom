@@ -1,224 +1,329 @@
-// frontend/src/pages/Home.tsx
-import { useAuth } from "../hooks/useAuth";
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { FiShoppingCart, FiSearch, FiLogOut } from "react-icons/fi";
-import { FaUserCircle } from "react-icons/fa";
+// frontend\src\pages\admin\Products.tsx
+// Admin Products page: full CRUD UI using the reusable products slice + DataTable.
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+  createProductThunk,
+  deleteProductThunk,
+  fetchProducts,
+  selectProducts,
+  selectProductsLoading,
+  selectProductsPagination,
+  setProductFilters,
+  setSelectedProduct,
+  toggleProductStatusThunk,
+  updateProductThunk,
+  selectSelectedProduct,
+} from "../../features/products/productSlice";
+import type { ProductForm, Product } from "../../types/product";
+import DataTable from "../../components/common/DataTable";
+import type { Column } from "../../components/common/DataTable";
+const emptyForm: ProductForm = {
+  name: "",
+  description: "",
+  price: 0,
+  stock: 0,
+  is_active: true,
+};
 
-export default function Home() {
-  function ProfileDropdown({ user }: { user: any }) {
-    const [open, setOpen] = useState(false);
+export default function AdminProductsPage() {
+  const dispatch = useAppDispatch();
 
-    return (
-      <div className="relative">
-        <button
-          onClick={() => setOpen(!open)}
-          className="flex items-center gap-2 focus:outline-none"
+  const products = useAppSelector(selectProducts);
+  const loading = useAppSelector(selectProductsLoading);
+  const pagination = useAppSelector(selectProductsPagination);
+  const selected = useAppSelector(selectSelectedProduct);
+
+  const [search, setSearch] = useState("");
+  const [form, setForm] = useState<ProductForm>(emptyForm);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Load products on first render.
+  useEffect(() => {
+    dispatch(fetchProducts(undefined));
+  }, [dispatch]);
+
+  const openCreateModal = () => {
+    setIsEditing(false);
+    setForm(emptyForm);
+    dispatch(setSelectedProduct(null));
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (product: Product) => {
+    setIsEditing(true);
+    dispatch(setSelectedProduct(product));
+    setForm({
+      name: product.name,
+      description: product.description,
+      price: Number(product.price),
+      stock: product.stock,
+      is_active: product.is_active,
+    });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isEditing && selected) {
+      dispatch(updateProductThunk({ id: selected.id, data: form }));
+    } else {
+      dispatch(createProductThunk(form));
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleDelete = (product: Product) => {
+    if (window.confirm(`Delete product "${product.name}"?`)) {
+      dispatch(deleteProductThunk(product.id));
+    }
+  };
+
+  const handleToggleStatus = (product: Product) => {
+    dispatch(toggleProductStatusThunk(product.id));
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    dispatch(setProductFilters({ search, page: 1 }));
+    dispatch(fetchProducts({ search, page: 1 }));
+  };
+
+  const handlePageChange = (page: number) => {
+    dispatch(setProductFilters({ page }));
+    dispatch(fetchProducts({ search, page }));
+  };
+
+  const columns: Column<Product>[] = [
+    { key: "id", header: "ID" },
+    { key: "name", header: "Name" },
+    {
+      key: "price",
+      header: "Price",
+      render: (row) => <span>${Number(row.price).toFixed(2)}</span>,
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: (row) => (
+        <span
+          className={
+            "px-2 inline-flex text-xs leading-5 font-semibold rounded-full " +
+            (row.is_active
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800")
+          }
         >
-          {user.avatar ? (
-            <img
-              src={user.avatar}
-              alt="Profile"
-              className="w-8 h-8 rounded-full object-cover"
-            />
-          ) : (
-            <FaUserCircle className="text-3xl" />
-          )}
-        </button>
-
-        {open && (
-          <div className="absolute right-0 mt-3 w-48 bg-white text-gray-800 rounded-lg shadow-lg py-2">
-            <Link
-              to="/profile"
-              className="block px-4 py-2 text-sm hover:bg-gray-100"
-            >
-              Profile
-            </Link>
-            <Link
-              to="/orders"
-              className="block px-4 py-2 text-sm hover:bg-gray-100"
-            >
-              Orders
-            </Link>
-            <button className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flex items-center gap-2">
-              <FiLogOut />
-              Logout
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  const products = [
-    {
-      id: 1,
-      name: "Basic Tee",
-      href: "#",
-      imageSrc:
-        "https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-01-related-product-01.jpg",
-      imageAlt: "Front of men's Basic Tee in black.",
-      price: "$35",
-      color: "Black",
+          {row.is_active ? "Active" : "Inactive"}
+        </span>
+      ),
     },
     {
-      id: 2,
-      name: "Basic Tee",
-      href: "#",
-      imageSrc:
-        "https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-01-related-product-02.jpg",
-      imageAlt: "Front of men's Basic Tee in white.",
-      price: "$35",
-      color: "Aspen White",
-    },
-    {
-      id: 3,
-      name: "Basic Tee",
-      href: "#",
-      imageSrc:
-        "https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-01-related-product-03.jpg",
-      imageAlt: "Front of men's Basic Tee in dark gray.",
-      price: "$35",
-      color: "Charcoal",
-    },
-    {
-      id: 4,
-      name: "Artwork Tee",
-      href: "#",
-      imageSrc:
-        "https://tailwindcss.com/plus-assets/img/ecommerce-images/product-page-01-related-product-04.jpg",
-      imageAlt:
-        "Front of men's Artwork Tee in peach with white and brown dots forming an isometric cube.",
-      price: "$35",
-      color: "Iso Dots",
+      key: "actions",
+      header: "Actions",
+      render: (row) => (
+        <div className="flex gap-2">
+          <button
+            onClick={() => openEditModal(row)}
+            className="text-xs px-2 py-1 rounded bg-indigo-600 text-white"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => handleToggleStatus(row)}
+            className="text-xs px-2 py-1 rounded bg-yellow-500 text-white"
+          >
+            {row.is_active ? "Deactivate" : "Activate"}
+          </button>
+          <button
+            onClick={() => handleDelete(row)}
+            className="text-xs px-2 py-1 rounded bg-red-600 text-white"
+          >
+            Delete
+          </button>
+        </div>
+      ),
     },
   ];
-  const { user, isAdmin, isVendor, isCustomer } = useAuth();
 
   return (
-    <div className="bg-gray-900 min-h-screen text-white">
-      {/* Navbar */}
-      <header className="absolute inset-x-0 top-0 z-50">
-        <nav className="flex items-center justify-between p-6 lg:px-8 bg-gray-900 text-white">
-          {/* Logo */}
-          <div className="flex flex-1">
-            <Link to="/" className="-m-1.5 p-1.5">
-              <img
-                src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-                alt="Logo"
-                className="h-8 w-auto"
-              />
-            </Link>
-          </div>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Products (Admin)</h1>
+        <button
+          onClick={openCreateModal}
+          className="px-4 py-2 rounded bg-indigo-600 text-white text-sm font-semibold"
+        >
+          + New Product
+        </button>
+      </div>
 
-          {/* Search Bar */}
-          <div className="hidden md:flex items-center w-full max-w-md mx-6">
-            <div className="relative w-full">
-              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full rounded-lg bg-gray-800 border border-gray-700 pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-          </div>
+      {/* Search + filters */}
+      <form onSubmit={handleSearch} className="mb-4 flex gap-2">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search products..."
+          className="flex-1 border rounded px-3 py-2 text-sm"
+        />
+        <button
+          type="submit"
+          className="px-4 py-2 rounded bg-gray-800 text-white text-sm"
+        >
+          Search
+        </button>
+      </form>
 
-          {/* Right Section */}
-          <div className="flex flex-1 justify-end items-center gap-6">
-            {/* Cart */}
-            <Link to="/cart" className="relative">
-              <FiShoppingCart className="text-2xl" />
-              <span className="absolute -top-2 -right-2 bg-indigo-500 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                3
-              </span>
-            </Link>
+      {/* Products table */}
+      <DataTable<Product>
+        data={products}
+        columns={columns}
+        loading={loading}
+        emptyMessage="No products found."
+      />
 
-            {/* Profile */}
-            {!user ? (
-              <Link to="/login" className="text-sm font-semibold">
-                Log in →
-              </Link>
-            ) : (
-              <ProfileDropdown user={user} />
-            )}
-          </div>
-        </nav>
-      </header>
-
-      {/* Hero */}
-      <main className="relative isolate px-6 pt-32 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-5xl font-bold tracking-tight sm:text-7xl">
-            Build your online business
-          </h1>
-          <p className="mt-6 text-lg text-gray-400">
-            Powerful tools to manage products, vendors, and customers in one
-            place.
-          </p>
-
-          <div className="mt-10 flex justify-center gap-x-6">
-            <Link
-              to="#"
-              className="rounded-md bg-indigo-500 px-4 py-2.5 font-semibold hover:bg-indigo-400"
-            >
-              Get started
-            </Link>
-            <Link
-              to="#"
-              className="rounded-md px-4 py-2.5 font-semibold border border-white/30 hover:border-white"
-            >
-              Learn more →
-            </Link>
-          </div>
+      {/* Simple pagination controls */}
+      <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+        <div>
+          Page {pagination.currentPage} of {pagination.lastPage} • Total{" "}
+          {pagination.total}
         </div>
-      </main>
-
-      {/* Dashboard Section */}
-      <section className="mt-20 text-center space-y-4">
-        {/* <h2 className="text-2xl font-semibold">
-          Welcome {user?.name}
-        </h2> */}
-
-        {isAdmin && <p className="text-indigo-400">Admin Dashboard</p>}
-        {isVendor && <p className="text-green-400">Vendor Dashboard</p>}
-        {isCustomer && <p className="text-yellow-400">Shop Products</p>}
-      </section>
-
-      <div className="bg-white">
-        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-            Customers also purchased
-          </h2>
-
-          <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-            {products.map((product) => (
-              <div key={product.id} className="group relative">
-                <img
-                  alt={product.imageAlt}
-                  src={product.imageSrc}
-                  className="aspect-square w-full rounded-md bg-gray-200 object-cover group-hover:opacity-75 lg:aspect-auto lg:h-80"
-                />
-                <div className="mt-4 flex justify-between">
-                  <div>
-                    <h3 className="text-sm text-gray-700">
-                      <a href={product.href}>
-                        <span aria-hidden="true" className="absolute inset-0" />
-                        {product.name}
-                      </a>
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {product.color}
-                    </p>
-                  </div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {product.price}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            disabled={pagination.currentPage <= 1}
+            onClick={() => handlePageChange(pagination.currentPage - 1)}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            disabled={pagination.currentPage >= pagination.lastPage}
+            onClick={() => handlePageChange(pagination.currentPage + 1)}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       </div>
+
+      {/* Modal for create/edit product */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+            <h2 className="text-lg font-bold mb-4">
+              {isEditing ? "Edit Product" : "New Product"}
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, name: e.target.value }))
+                  }
+                  required
+                  className="mt-1 w-full border rounded px-3 py-2 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Description
+                </label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, description: e.target.value }))
+                  }
+                  className="mt-1 w-full border rounded px-3 py-2 text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Price
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={form.price}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        price: Number(e.target.value),
+                      }))
+                    }
+                    required
+                    className="mt-1 w-full border rounded px-3 py-2 text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Stock
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.stock ?? 0}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        stock: Number(e.target.value),
+                      }))
+                    }
+                    className="mt-1 w-full border rounded px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  id="is_active"
+                  type="checkbox"
+                  checked={form.is_active ?? true}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, is_active: e.target.checked }))
+                  }
+                />
+                <label htmlFor="is_active" className="text-sm text-gray-700">
+                  Active
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="px-4 py-2 rounded border text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded bg-indigo-600 text-white text-sm font-semibold"
+                >
+                  {isEditing ? "Save changes" : "Create product"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,46 +1,54 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import type { AuthState } from "./authTypes";
-import { loginApi, meApi } from "./authService";
+// Types for the products slice (Redux state for admin product CRUD).
 
-const initialState: AuthState = {
-  user: null,
-  token: localStorage.getItem("token"),
+import type { Product, ProductForm, ProductFilters, PaginatedResponse } from "../../types/product";
+
+// State for the products list and CRUD operations.
+export interface ProductState {
+  // Current list of products shown in the table.
+  items: Product[];
+
+  // Currently selected product for editing (or null when none).
+  selected: Product | null;
+
+  // Loading + error flags for async operations.
+  loading: boolean;
+  error: string | null;
+
+  // Filters for the list (search, pagination).
+  filters: ProductFilters;
+
+  // Pagination info from backend (you can reuse this pattern for other entities).
+  pagination: {
+    currentPage: number;
+    lastPage: number;
+    perPage: number;
+    total: number;
+  };
+}
+
+// Helper to create an initial pagination object from a response.
+export const mapPagination = <T>(res: PaginatedResponse<T>) => ({
+  currentPage: res.current_page ?? 1,
+  lastPage: res.last_page ?? 1,
+  perPage: res.per_page ?? res.data.length ?? 10,
+  total: res.total ?? res.data.length ?? 0,
+});
+
+// Initial default state for products slice.
+export const initialProductState: ProductState = {
+  items: [],
+  selected: null,
   loading: false,
+  error: null,
+  filters: {
+    search: "",
+    page: 1,
+    perPage: 10,
+  },
+  pagination: {
+    currentPage: 1,
+    lastPage: 1,
+    perPage: 10,
+    total: 0,
+  },
 };
-
-export const login = createAsyncThunk(
-  "auth/login",
-  async (data: { email: string; password: string }) => {
-    return await loginApi(data);
-  }
-);
-
-export const me = createAsyncThunk("auth/me", async () => {
-  return await meApi();
-});
-
-const authSlice = createSlice({
-  name: "auth",
-  initialState,
-  reducers: {
-    logout(state) {
-      state.user = null;
-      state.token = null;
-      localStorage.removeItem("token");
-    },
-  },
-  extraReducers(builder) {
-    builder
-      .addCase(login.fulfilled, (state, action) => {
-        state.token = action.payload.token;
-        state.user = action.payload.user;
-        localStorage.setItem("token", action.payload.token);
-      })
-      .addCase(me.fulfilled, (state, action) => {
-        state.user = action.payload;
-      });
-  },
-});
-
-export const { logout } = authSlice.actions;
-export default authSlice.reducer;

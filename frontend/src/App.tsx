@@ -4,8 +4,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Home from "./pages/Home";
-import Login from "./pages/auth/Login";
+import CustomerLogin from "./pages/auth/Login";
+import AdminLogin from "./pages/auth/AdminLogin";
 import Register from "./pages/auth/Register";
 import Cart from "./pages/Cart";
 import ProductDetail from "./pages/ProductDetail";
@@ -17,7 +20,11 @@ import { GuestRoute } from "./routes/GuestRoute";
 import AdminRoute from "./routes/AdminRoutes";
 import VendorRoute from "./routes/VendorRoutes";
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminProductsPage from "./pages/admin/Products";
 import VendorDashboard from "./pages/vendor/Dashboard";
+import CustomerLayout from "./components/layout/CustomerLayout";
+import AdminLayout from "./components/layout/AdminLayout";
+import VendorLayout from "./components/layout/VendorLayout";
 
 import { me } from "./features/auth/authSlice";
 
@@ -39,13 +46,24 @@ function App() {
   return (
     // BrowserRouter enables client-side routing (no full page reloads).
     <BrowserRouter>
+      {/* Global toast container for notifications */}
+      <ToastContainer position="top-right" autoClose={3000} />
+
       <Routes>
         {/* Guest-only routes (only for users who are NOT logged in) */}
         <Route
           path="/login"
           element={
             <GuestRoute>
-              <Login />
+              <CustomerLogin />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/admin/login"
+          element={
+            <GuestRoute>
+              <AdminLogin />
             </GuestRoute>
           }
         />
@@ -58,41 +76,48 @@ function App() {
           }
         />
 
-        {/* Protected routes (only for logged-in users) */}
-        <Route
-          path="/cart"
-          element={
-            <ProtectedRoute>
-              <Cart />
-            </ProtectedRoute>
-          }
-        />
+        {/* Customer layout and routes */}
+        <Route element={<CustomerLayout />}>
+          {/* Public + protected customer pages */}
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute>
+                <Cart />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
 
-        {/* Role-based routes (admin/vendor only) */}
+        {/* Admin routes wrapped in AdminLayout + AdminRoute */}
         <Route
-          path="/admin/dashboard"
+          path="/admin"
           element={
             <AdminRoute>
-              <AdminDashboard />
+              <AdminLayout />
             </AdminRoute>
           }
-        />
+        >
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProductsPage />} />
+        </Route>
 
+        {/* Vendor routes wrapped in VendorLayout + VendorRoute */}
         <Route
-          path="/vendor/dashboard"
+          path="/vendor"
           element={
             <VendorRoute>
-              <VendorDashboard />
+              <VendorLayout />
             </VendorRoute>
           }
-        />
-
-        {/* Public routes (anyone can see these) */}
-        <Route path="/" element={<Home />} />
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/profile" element={<Profile />} />
+        >
+          <Route path="dashboard" element={<VendorDashboard />} />
+        </Route>
 
         {/* Fallback: if no route matches, show Home page */}
         <Route path="*" element={<Home />} />
