@@ -6,11 +6,11 @@ import { Outlet } from "react-router-dom";
 function CustomerLayout() {
   return (
     <>
-      <Navbar />
+      <Navbar/>
       <main>
-        <Outlet />
+        <Outlet/>
       </main>
-      <Footer />
+      <Footer/>
     </>
   );
 };
